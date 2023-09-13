@@ -1,0 +1,39 @@
+---
+- name: Create developer users
+  hosts: appnode 
+  vars_files:
+    - lock.yml
+    - users_list.yml
+  tasks:
+    - name: create group developer
+      group:
+        name: developer
+        state: present  
+    - name: create developer users
+      user:
+        name: "{{item.name}}"
+        group: developer
+        password: "{{ PW_dev | password_hash('sha512') }}"
+        state: present
+      when: item.job == "developer"
+      loop: "{{ users }}"
+
+- name: create manager account
+  hosts: appnode2
+  vars_files:
+    - lock.yml
+    - users_list.yml
+  tasks:
+    - name: Create manager group
+      group:
+        name: manager
+        state: present
+    - name: Crete manager group
+      user:
+        name: "{{ item.name }}"
+        group: manager
+        password: "{{ PW_mgr | password_hash('sha512') }}"
+        state: present
+      when: item.job == "manager"
+      loop: "{{ users }}"
+      
